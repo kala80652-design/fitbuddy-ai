@@ -1,0 +1,148 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: fitbuddy-alerting-rules
+  namespace: production
+  labels:
+    role: alert-rules
+    app.kubernetes.io/name: fitbuddy-monitoring
+spec:
+  groups:
+    - name: fitbuddy.sev1.critical
+      rules:
+        # 1. HTTP 5xx Error Rate > 0.1% for 2 minutes
+        - alert: FitBuddyHighErrorRateSev1
+          expr: |
+            (
+              sum(rate(http_requests_total{job="fitbuddy-app", status=~"5.."}[2m]))
+              /
+              sum(rate(http_requests_total{job="fitbuddy-app"}[2m]))
+            ) * 100 > 0.1
+          for: 2m
+          labels:
+            severity: critical
+            tier: sev-1
+            component: core-api
+            runbook_url: "https://docs.fitbuddy.enterprise/runbooks/sev1/high-error-rate"
+          annotations:
+            summary: "Core API HTTP 5xx error rate exceeded 0.1% SLA"
+            description: "Production API HTTP 5xx error rate is currently {{ $value | printf \"%.3f\" }}% over the last 2 minutes."
+            dashboard_url: "https://grafana.fitbuddy.enterprise/d/fitbuddy-core/fitbuddy-production-overview?viewPanel=3"
+
+        # 2. P95 Latency > 250ms for 2 minutes
+        - alert: FitBuddyP95LatencyBreachedSev1
+          expr: |
+            histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="fitbuddy-app", path=~"/api/v1/plans/.*"}[2m])) by (le)) * 1000 > 250
+          for: 2m
+          labels:
+            severity: critical
+            tier: sev-1
+            component: core-api
+            runbook_url: "https://docs.fitbuddy.enterprise/runbooks/sev1/p95-latency"
+          annotations:
+            summary: "AI Plan Generation P95 Latency exceeded 250ms threshold"
+            description: "P95 request duration for plan generation endpoints is {{ $value | printf \"%.2f\" }}ms."
+            dashboard_url: "https://grafana.fitbuddy.enterprise/d/fitbuddy-core/fitbuddy-production-overview?viewPanel=2"
+
+        # 3. Gemini 1.5 Pro Quota / Rate Limit (429) or Outage
+        - alert: GeminiProQuotaExhaustionSev1
+          expr: |
+            sum(rate(genai_model_requests_total{model="gemini-1.5-pro", status="429"}[1m])) > 0.5
+            or
+            sum(rate(genai_model_requests_total{model="gemini-1.5-pro", status=~"5.."}[1m])) > 0.5
+          for: 1m
+          labels:
+            severity: critical
+            tier: sev-1
+            component: genai-gateway
+            runbook_url: "https://docs.fitbuddy.enterprise/runbooks/sev1/gemini-fallback"
+          annotations:
+            summary: "Google Gemini 1.5 Pro API 429 quota exhaustion or upstream failure"
+            description: "Primary LLM Gemini 1.5 Pro is failing with rate limit or 5xx errors. Triggering automated circuit breaker."
+            dashboard_url: "https://grafana.fitbuddy.enterprise/d/fitbuddy-core/fitbuddy-production-overview?viewPanel=12"
+
+        # 4. Celery Task Queue Backlog > 5000 Tasks
+        - alert: CeleryQueueBacklogCriticalSev1
+          expr: celery_queue_length{queue="workout_generation"} > 5000
+          for: 2m
+          labels:
+            severity: critical
+            tier: sev-1
+            component: celery-worker
+            runbook_url: "https://docs.fitbuddy.enterprise/runbooks/sev1/celery-backlog"
+          annotations:
+            summary: "Celery workout generation task queue backlog exceeded 5,000 tasks"
+            description: "Current task queue length is {{ $value }} tasks. Autoscaler intervention required."
+            dashboard_url: "https://grafana.fitbuddy.enterprise/d/fitbuddy-core/fitbuddy-production-overview?viewPanel=9"
+
+        # 5. PostgreSQL Replication Lag > 30s
+        - alert: PostgresReplicationLagCriticalSev1
+          expr: pg_replication_lag_seconds > 30
+          for: 1m
+          labels:
+            severity: critical
+            tier: sev-1
+            component: postgresql
+            runbook_url: "https://docs.fitbuddy.enterprise/runbooks/sev1/postgres-replication"
+          annotations:
+            summary: "PostgreSQL read replica lag exceeded 30 seconds"
+            description: "PostgreSQL streaming replication lag is {{ $value }}s on replica cluster."
+            dashboard_url: "https://grafana.fitbuddy.enterprise/d/fitbuddy-core/fitbuddy-production-overview?viewPanel=11"
+
+    - name: fitbuddy.sev2.major
+      rules:
+        # 1. Redis Cluster Memory Utilization > 85%
+        - alert: RedisMemorySaturationSev2
+          expr: (redis_memory_used_bytes / redis_memory_max_bytes) * 100 > 85
+          for: 5m
+          labels:
+            severity: major
+            tier: sev-2
+            component: redis
+            runbook_url: "https://docs.fitbuddy.enterprise/runbooks/sev2/redis-memory"
+          annotations:
+            summary: "Redis Cluster Memory utilization exceeded 85%"
+            description: "Redis in-memory usage is at {{ $value | printf \"%.2f\" }}% of max allocated memory."
+            dashboard_url: "https://grafana.fitbuddy.enterprise/d/fitbuddy-core/fitbuddy-production-overview?viewPanel=10"
+
+        # 2. MediaPipe Kinematic Pose Frame Latency > 500ms
+        - alert: MediaPipeKinematicLatencyDegradedSev2
+          expr: histogram_quantile(0.95, sum(rate(kinematic_frame_processing_duration_seconds_bucket[5m])) by (le)) * 1000 > 500
+          for: 3m
+          labels:
+            severity: major
+            tier: sev-2
+            component: edge-vision
+            runbook_url: "https://docs.fitbuddy.enterprise/runbooks/sev2/kinematic-latency"
+          annotations:
+            summary: "MediaPipe 33-point Pose processing latency elevated > 500ms"
+            description: "P95 Kinematic frame evaluation time is {{ $value | printf \"%.2f\" }}ms."
+            dashboard_url: "https://grafana.fitbuddy.enterprise/d/fitbuddy-core/fitbuddy-production-overview?viewPanel=14"
+
+        # 3. Celery Dead-Letter Queue (DLQ) Ingestion Rate > 10 tasks/sec
+        - alert: CeleryHighDLQRateSev2
+          expr: rate(celery_task_dlq_total[2m]) > 10
+          for: 2m
+          labels:
+            severity: major
+            tier: sev-2
+            component: celery-worker
+            runbook_url: "https://docs.fitbuddy.enterprise/runbooks/sev2/celery-dlq"
+          annotations:
+            summary: "Celery Dead-Letter Queue (DLQ) ingestion rate elevated"
+            description: "Tasks are failing and routing to DLQ at {{ $value | printf \"%.2f\" }} tasks/second."
+            dashboard_url: "https://grafana.fitbuddy.enterprise/d/fitbuddy-core/fitbuddy-production-overview?viewPanel=9"
+
+        # 4. PostgreSQL Connection Pool Saturation > 80%
+        - alert: PostgresConnectionPoolSaturationSev2
+          expr: (pg_stat_activity_count{state!="idle"} / pg_settings_max_connections) * 100 > 80
+          for: 3m
+          labels:
+            severity: major
+            tier: sev-2
+            component: postgresql
+            runbook_url: "https://docs.fitbuddy.enterprise/runbooks/sev2/postgres-connections"
+          annotations:
+            summary: "PostgreSQL active connection pool utilization > 80%"
+            description: "Active PostgreSQL connection pool utilization is currently {{ $value | printf \"%.2f\" }}%."
+            dashboard_url: "https://grafana.fitbuddy.enterprise/d/fitbuddy-core/fitbuddy-production-overview?viewPanel=11"

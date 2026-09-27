@@ -1,0 +1,41 @@
+apiVersion: flagger.app/v1beta1
+kind: Canary
+metadata:
+  name: fitbuddy-web-canary
+  namespace: fitbuddy
+spec:
+  # Target Deployment reference
+  targetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: fitbuddy-web
+  # Autoscaler reference
+  autoscalerRef:
+    apiVersion: autoscaling/v2
+    kind: HorizontalPodAutoscaler
+    name: fitbuddy-web-hpa
+  service:
+    port: 80
+    targetPort: 8000
+    gateways:
+      - mesh
+  analysis:
+    interval: 1m
+    threshold: 5
+    maxWeight: 50
+    stepWeight: 10
+    metrics:
+      - name: request-success-rate
+        thresholdRange:
+          min: 99
+        interval: 1m
+      - name: request-duration
+        thresholdRange:
+          max: 3000
+        interval: 1m
+    webhooks:
+      - name: load-test
+        url: http://flagger-loadtester.test/
+        timeout: 5s
+        metadata:
+          cmd: "k6 run /tests/load_test_k6.js"

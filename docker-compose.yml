@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  fitbuddy-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fitbuddy-container
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - fitbuddy_data:/app
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  fitbuddy_data:
+    driver: local

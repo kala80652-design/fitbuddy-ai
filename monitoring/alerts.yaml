@@ -1,0 +1,46 @@
+groups:
+  - name: fitbuddy_production_alerts
+    rules:
+      # 1. High HTTP 5xx Error Rate
+      - alert: FitBuddyHighErrorRate
+        expr: (sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m]))) * 100 > 2
+        for: 5m
+        labels:
+          severity: critical
+          team: sre
+        annotations:
+          summary: "FitBuddy High 5xx Error Rate (>2%)"
+          description: "HTTP 5xx error rate has exceeded 2% for 5 minutes. Current value: {{ $value }}%."
+
+      # 2. P95 AI Generation Latency Breach
+      - alert: FitBuddyAILatencyBreach
+        expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{handler=~"/api/v1/.*"}[10m])) by (le)) > 6.0
+        for: 10m
+        labels:
+          severity: warning
+          team: ai-engineering
+        annotations:
+          summary: "P95 AI Plan Generation Latency > 6s"
+          description: "P95 response latency for AI plan generation endpoints is {{ $value }}s over the last 10m."
+
+      # 3. Celery Queue Backlog
+      - alert: FitBuddyCeleryQueueBacklog
+        expr: celery_queue_length{queue="celery"} > 200
+        for: 5m
+        labels:
+          severity: warning
+          team: backend
+        annotations:
+          summary: "Celery task queue backlog > 200 tasks"
+          description: "Pending asynchronous task count is {{ $value }}, indicating worker saturation."
+
+      # 4. PostgreSQL Connection Pool Saturation
+      - alert: FitBuddyDatabasePoolExhaustion
+        expr: (sqlalchemy_pool_checked_out_connections / sqlalchemy_pool_size) > 0.90
+        for: 3m
+        labels:
+          severity: critical
+          team: dba
+        annotations:
+          summary: "PostgreSQL Connection Pool > 90% Saturation"
+          description: "Active database checked-out connections reached {{ $value }}% of pool capacity."

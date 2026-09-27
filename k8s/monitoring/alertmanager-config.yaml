@@ -1,0 +1,117 @@
+global:
+  resolve_timeout: 5m
+  pagerduty_url: "https://events.pagerduty.com/v2/enqueue"
+  slack_api_url: "https://hooks.slack.com/services/T00000000/B00000000/YOUR_SECRET_HERE"
+
+route:
+  group_by: ['alertname', 'cluster', 'service', 'tier']
+  group_wait: 10s
+  group_interval: 1m
+  repeat_interval: 2h
+  receiver: 'default-webhook-receiver'
+  routes:
+    # Sev-1: Critical Outages & Hard SLA Breaches (PagerDuty Voice + War Room Slack)
+    - match:
+        severity: critical
+        tier: sev-1
+      receiver: 'pagerduty-sev1-critical'
+      group_wait: 0s
+      group_interval: 30s
+      repeat_interval: 15m
+      continue: true
+
+    - match:
+        severity: critical
+        tier: sev-1
+      receiver: 'slack-war-room-sev1'
+      group_wait: 0s
+      group_interval: 30s
+      repeat_interval: 30m
+
+    # Sev-2: Major Performance & Infrastructure Degradations (SMS + Eng Incidents Slack)
+    - match:
+        severity: major
+        tier: sev-2
+      receiver: 'pagerduty-sev2-major'
+      group_wait: 30s
+      group_interval: 2m
+      repeat_interval: 1h
+      continue: true
+
+    - match:
+        severity: major
+        tier: sev-2
+      receiver: 'slack-eng-incidents'
+      group_wait: 30s
+      group_interval: 2m
+      repeat_interval: 2h
+
+inhibit_rules:
+  # Inhibit pod and endpoint level latency alerts if the Istio Ingress Gateway is down
+  - source_match:
+      alertname: 'IstioGatewayDown'
+      severity: 'critical'
+    target_match_re:
+      alertname: 'FitBuddy.*Latency.*|FitBuddyHighErrorRate.*'
+    equal: ['cluster', 'namespace']
+
+  # Inhibit individual LLM latency warnings if the master Gemini Circuit Breaker has already tripped
+  - source_match:
+      alertname: 'GeminiProQuotaExhaustionSev1'
+      severity: 'critical'
+    target_match_re:
+      alertname: '.*Gemini.*Latency.*|.*ModelSlow.*'
+    equal: ['component']
+
+receivers:
+  - name: 'default-webhook-receiver'
+    webhook_configs:
+      - url: 'http://fitbuddy-sre-automation.production.svc.cluster.local:9090/alerts'
+        send_resolved: true
+
+  - name: 'pagerduty-sev1-critical'
+    pagerduty_configs:
+      - routing_key: 'pd_service_key_sev1_voice_critical_fitbuddy'
+        send_resolved: true
+        severity: 'critical'
+        client: 'FitBuddy Prometheus Alertmanager'
+        client_url: 'https://alertmanager.fitbuddy.enterprise'
+        description: '[SEV-1 CRITICAL] {{ .CommonAnnotations.summary }} - {{ .CommonAnnotations.description }}'
+        details:
+          tier: '{{ .CommonLabels.tier }}'
+          component: '{{ .CommonLabels.component }}'
+          runbook: '{{ .CommonLabels.runbook_url }}'
+          dashboard: '{{ .CommonAnnotations.dashboard_url }}'
+
+  - name: 'pagerduty-sev2-major'
+    pagerduty_configs:
+      - routing_key: 'pd_service_key_sev2_standard_fitbuddy'
+        send_resolved: true
+        severity: 'error'
+        client: 'FitBuddy Prometheus Alertmanager'
+        client_url: 'https://alertmanager.fitbuddy.enterprise'
+        description: '[SEV-2 MAJOR] {{ .CommonAnnotations.summary }} - {{ .CommonAnnotations.description }}'
+        details:
+          tier: '{{ .CommonLabels.tier }}'
+          component: '{{ .CommonLabels.component }}'
+          runbook: '{{ .CommonLabels.runbook_url }}'
+
+  - name: 'slack-war-room-sev1'
+    slack_configs:
+      - channel: '#war-room-sev1'
+        send_resolved: true
+        title: '🚨 [SEV-1 CRITICAL] {{ .CommonAnnotations.summary }}'
+        text: >-
+          *Description:* {{ .CommonAnnotations.description }}
+          *Component:* `{{ .CommonLabels.component }}` | *Severity:* `{{ .CommonLabels.severity }}`
+          *Runbook:* <{{ .CommonLabels.runbook_url }}|Open Runbook> | *Dashboard:* <{{ .CommonAnnotations.dashboard_url }}|View Telemetry>
+
+  - name: 'slack-eng-incidents'
+    slack_configs:
+      - channel: '#eng-incidents'
+        send_resolved: true
+        title: '⚠️ [SEV-2 MAJOR] {{ .CommonAnnotations.summary }}'
+        text: >-
+          *Description:* {{ .CommonAnnotations.description }}
+          *Component:* `{{ .CommonLabels.component }}` | *Severity:* `{{ .CommonLabels.severity }}`
+          *Runbook:* <{{ .CommonLabels.runbook_url }}|Open Runbook>

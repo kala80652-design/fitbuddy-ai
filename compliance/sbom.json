@@ -1,0 +1,239 @@
+{
+  "$schema": "http://cyclonedx.org/schema/bom-1.5.schema.json",
+  "bomFormat": "CycloneDX",
+  "specVersion": "1.5",
+  "serialNumber": "urn:uuid:60a44210-821e-49d7-979c-08ab8bc62249",
+  "version": 1,
+  "metadata": {
+    "timestamp": "2026-09-27T04:25:00Z",
+    "tools": [
+      {
+        "vendor": "FitBuddy Enterprise Security & Compliance",
+        "name": "AuditScanner-Pro",
+        "version": "2.4.0"
+      }
+    ],
+    "authors": [
+      {
+        "name": "Corporate General Counsel & Lead SRE",
+        "email": "compliance@fitbuddy.enterprise"
+      }
+    ],
+    "component": {
+      "type": "application",
+      "bom-ref": "fitbuddy-platform@2.4.0",
+      "name": "FitBuddy Enterprise AI Fitness & Sports Nutrition Platform",
+      "version": "2.4.0",
+      "description": "Enterprise cloud-native dual-engine AI workout and sports nutrition microservice platform",
+      "licenses": [
+        {
+          "license": {
+            "id": "Proprietary",
+            "name": "FitBuddy Commercial Enterprise License"
+          }
+        }
+      ]
+    }
+  },
+  "components": [
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/fastapi@0.110.0",
+      "name": "fastapi",
+      "version": "0.110.0",
+      "purl": "pkg:pypi/fastapi@0.110.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        }
+      ],
+      "licenses": [{ "license": { "id": "MIT" } }],
+      "description": "High performance modern web framework for building APIs with Python"
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/uvicorn@0.29.0",
+      "name": "uvicorn",
+      "version": "0.29.0",
+      "purl": "pkg:pypi/uvicorn@0.29.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "8b51d6db2f27fd114138e4a9e5b22b6c93d9a103c814b73cbbe44b58e705b018"
+        }
+      ],
+      "licenses": [{ "license": { "id": "BSD-3-Clause" } }],
+      "description": "Lightning-fast ASGI web server implementation"
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/celery@5.3.6",
+      "name": "celery",
+      "version": "5.3.6",
+      "purl": "pkg:pypi/celery@5.3.6",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "5f13459c0ef9b736b7729f10927976e1a0fa25e6c708170c0c7b64ff0f098017"
+        }
+      ],
+      "licenses": [{ "license": { "id": "BSD-3-Clause" } }],
+      "description": "Distributed Task Queue for asynchronous workflow execution"
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/redis@5.0.3",
+      "name": "redis",
+      "version": "5.0.3",
+      "purl": "pkg:pypi/redis@5.0.3",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "7c35697d4df0e1074e0d4949a2a969bc74c73228a6fcf79fbe4a819b101662fb"
+        }
+      ],
+      "licenses": [{ "license": { "id": "MIT" } }],
+      "description": "Python interface to the Redis in-memory data structure store"
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/sqlalchemy@2.0.28",
+      "name": "sqlalchemy",
+      "version": "2.0.28",
+      "purl": "pkg:pypi/sqlalchemy@2.0.28",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "1c7a8f3b236162a84d41e765502c384e93144a49c4f1c95be045f299863a32dc"
+        }
+      ],
+      "licenses": [{ "license": { "id": "MIT" } }],
+      "description": "Database Abstraction Library and Object Relational Mapper"
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/asyncpg@0.29.0",
+      "name": "asyncpg",
+      "version": "0.29.0",
+      "purl": "pkg:pypi/asyncpg@0.29.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "a1f0a8e1837c442cfbe9c4b78df49206d91316bcf2624ff96a18dca46757b447"
+        }
+      ],
+      "licenses": [{ "license": { "id": "Apache-2.0" } }],
+      "description": "High-performance asynchronous PostgreSQL database driver for Python/asyncio"
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/pydantic@2.6.4",
+      "name": "pydantic",
+      "version": "2.6.4",
+      "purl": "pkg:pypi/pydantic@2.6.4",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "8b51d6db2f27fd114138e4a9e5b22b6c93d9a103c814b73cbbe44b58e705b018"
+        }
+      ],
+      "licenses": [{ "license": { "id": "MIT" } }],
+      "description": "Data validation and settings management using Python type annotations"
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/google-generativeai@0.5.0",
+      "name": "google-generativeai",
+      "version": "0.5.0",
+      "purl": "pkg:pypi/google-generativeai@0.5.0",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "2837bc293d0f04c632ea9e1a8e93df1259ab738411b402123e4210cfefcb917a"
+        }
+      ],
+      "licenses": [{ "license": { "id": "Apache-2.0" } }],
+      "description": "Google Generative AI SDK for Gemini 1.5 Pro and Gemini 1.5 Flash"
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:pypi/pandas@2.2.1",
+      "name": "pandas",
+      "version": "2.2.1",
+      "purl": "pkg:pypi/pandas@2.2.1",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "3e03102c914e910efcb30129ad89b6b7cf918342719ba187f516089e5a59336f"
+        }
+      ],
+      "licenses": [{ "license": { "id": "BSD-3-Clause" } }],
+      "description": "Powerful data structures for data analysis, time series, and statistics"
+    },
+    {
+      "type": "library",
+      "bom-ref": "pkg:npm/@mediapipe/pose@0.5.1675469404",
+      "name": "@mediapipe/pose",
+      "version": "0.5.1675469404",
+      "purl": "pkg:npm/@mediapipe/pose@0.5.1675469404",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "9b1f7d983412ab9901ec0185123d45c63ef90818290ab9091823abce18012390"
+        }
+      ],
+      "licenses": [{ "license": { "id": "Apache-2.0" } }],
+      "description": "MediaPipe Pose edge 33-point skeletal landmark estimation runtime"
+    },
+    {
+      "type": "container",
+      "bom-ref": "pkg:oci/istio-proxy@1.21.0?repository_url=docker.io/istio/proxyv2",
+      "name": "istio-proxy",
+      "version": "1.21.0",
+      "purl": "pkg:oci/istio-proxy@1.21.0?repository_url=docker.io/istio/proxyv2",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "449019b8417c807b1d198129e12019ba291048102919ab12098401928019ab01"
+        }
+      ],
+      "licenses": [{ "license": { "id": "Apache-2.0" } }],
+      "description": "Istio Ingress and Sidecar Envoy Proxy"
+    },
+    {
+      "type": "container",
+      "bom-ref": "pkg:oci/flagger@1.36.0?repository_url=ghcr.io/fluxcd/flagger",
+      "name": "flagger",
+      "version": "1.36.0",
+      "purl": "pkg:oci/flagger@1.36.0?repository_url=ghcr.io/fluxcd/flagger",
+      "hashes": [
+        {
+          "alg": "SHA-256",
+          "content": "1098491028491082490182490182049182049182049182049182049182049182"
+        }
+      ],
+      "licenses": [{ "license": { "id": "Apache-2.0" } }],
+      "description": "Progressive delivery Kubernetes operator for Istio and Linkerd"
+    }
+  ],
+  "dependencies": [
+    {
+      "ref": "fitbuddy-platform@2.4.0",
+      "dependsOn": [
+        "pkg:pypi/fastapi@0.110.0",
+        "pkg:pypi/uvicorn@0.29.0",
+        "pkg:pypi/celery@5.3.6",
+        "pkg:pypi/redis@5.0.3",
+        "pkg:pypi/sqlalchemy@2.0.28",
+        "pkg:pypi/asyncpg@0.29.0",
+        "pkg:pypi/pydantic@2.6.4",
+        "pkg:pypi/google-generativeai@0.5.0",
+        "pkg:pypi/pandas@2.2.1",
+        "pkg:npm/@mediapipe/pose@0.5.1675469404",
+        "pkg:oci/istio-proxy@1.21.0?repository_url=docker.io/istio/proxyv2",
+        "pkg:oci/flagger@1.36.0?repository_url=ghcr.io/fluxcd/flagger"
+      ]
+    }
+  ]
+}

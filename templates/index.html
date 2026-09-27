@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitBuddy – AI Fitness Plan Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --accent: #ec4899;
+            --bg-gradient: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            --card-bg: rgba(30, 41, 59, 0.7);
+            --card-border: rgba(255, 255, 255, 0.1);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --input-bg: rgba(15, 23, 42, 0.6);
+            --input-border: rgba(255, 255, 255, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body {
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 40px 20px;
+        }
+
+        .navbar {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: #fff;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+        }
+
+        .brand span {
+            background: linear-gradient(90deg, #818cf8, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.08);
+            color: #cbd5e1;
+            padding: 10px 18px;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: 1px solid var(--card-border);
+            transition: all 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+
+        .hero {
+            text-align: center;
+            max-width: 680px;
+            margin-bottom: 35px;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            letter-spacing: -0.8px;
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+
+        .hero p {
+            color: var(--text-muted);
+            font-size: 1.05rem;
+            line-height: 1.6;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 680px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            backdrop-filter: blur(16px);
+            padding: 36px;
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.5);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        input, select {
+            width: 100%;
+            background: var(--input-bg);
+            border: 1px solid var(--input-border);
+            border-radius: 12px;
+            padding: 14px 16px;
+            color: #fff;
+            font-size: 0.98rem;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+        }
+
+        select option {
+            background-color: #1e293b;
+            color: #fff;
+        }
+
+        .submit-btn {
+            margin-top: 10px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            color: #fff;
+            border: none;
+            border-radius: 14px;
+            padding: 16px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 20px -5px rgba(99, 102, 241, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 25px -5px rgba(99, 102, 241, 0.6);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .loading-overlay {
+            display: none;
+            margin-top: 15px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .full-width {
+                grid-column: span 1;
+            }
+            .form-container {
+                padding: 24px;
+            }
+            .hero h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar">
+        <a href="/" class="brand">⚡ FitBuddy <span>AI</span></a>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="/coach-dashboard" class="nav-btn">Coach Portal</a>
+            <a href="/corporate-dashboard" class="nav-btn">Corporate Wellness</a>
+            <a href="/live-workout" class="nav-btn">Live Form Coach</a>
+            <a href="/view-all-users" class="nav-btn">Admin Dashboard →</a>
+        </div>
+    </nav>
+
+    <div class="hero">
+        <h1>Transform Your Body With Precision AI</h1>
+        <p>Personalized 7-day science-backed workout plans and precision nutrition coaching powered by Google Gemini.</p>
+    </div>
+
+    <div class="form-container">
+        <form action="/generate-workout" method="POST" id="workoutForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" name="name" placeholder="e.g. Alex Johnson" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="user_id">User ID / Username</label>
+                    <input type="text" id="user_id" name="user_id" placeholder="e.g. alex99" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="age">Age (Years)</label>
+                    <input type="number" id="age" name="age" min="12" max="100" placeholder="e.g. 26" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="weight">Weight (kg)</label>
+                    <input type="number" step="0.1" id="weight" name="weight" min="30" max="300" placeholder="e.g. 74.5" required>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="fitness_goal">Primary Fitness Goal</label>
+                    <select id="fitness_goal" name="fitness_goal" required>
+                        <option value="" disabled selected>Select your goal</option>
+                        <option value="Fat Loss & Calorie Burn">🔥 Fat Loss & Calorie Burn</option>
+                        <option value="Muscle Building & Hypertrophy">💪 Muscle Building & Hypertrophy</option>
+                        <option value="Strength & Power">⚡ Strength & Powerlifting</option>
+                        <option value="Cardiovascular Endurance & Stamina">🏃 Cardiovascular Endurance</option>
+                        <option value="General Health, Flexibility & Mobility">🧘 General Fitness & Mobility</option>
+                    </select>
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="intensity">Workout Intensity Level</label>
+                    <select id="intensity" name="intensity" required>
+                        <option value="" disabled selected>Select training intensity</option>
+                        <option value="Beginner (Light intensity, 3-4 days/week focus)">Beginner (Low to Moderate Intensity)</option>
+                        <option value="Intermediate (Moderate intensity, 4-5 days/week)">Intermediate (Targeted Workouts)</option>
+                        <option value="Advanced (High intensity, 5-6 days/week)">Advanced (High Intensity & High Volume)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="submit-btn full-width" id="btnSubmit">
+                    <span>Generate My 7-Day Plan</span> ✨
+                </button>
+            </div>
+            <div class="loading-overlay" id="loadingText">
+                Generating your custom workout & nutrition plan with Gemini AI... Please wait 5–10 seconds.
+            </div>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('workoutForm').addEventListener('submit', function() {
+            document.getElementById('btnSubmit').disabled = true;
+            document.getElementById('btnSubmit').style.opacity = '0.7';
+            document.getElementById('loadingText').style.display = 'block';
+        });
+    </script>
+</body>
+</html>

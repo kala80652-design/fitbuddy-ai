@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FitBuddy Enterprise – Coach Command Center</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <style>
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        .metric-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .metric-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #00f0ff;
+        }
+        .roster-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(15, 23, 42, 0.6);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .roster-table th, .roster-table td {
+            padding: 14px 18px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .badge-green { background: rgba(57, 255, 20, 0.2); color: #39ff14; }
+        .badge-yellow { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .badge-red { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+    </style>
+</head>
+<body>
+    <div class="container" style="max-width: 1100px;">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <div>
+                <h2> FitBuddy Enterprise – Coach Command Center</h2>
+                <p style="color: #94a3b8;">Apex Performance Gym (50 Active Athletes)</p>
+            </div>
+            <a href="/" class="btn">Client View</a>
+        </header>
+
+        <!-- KPI Metrics Grid -->
+        <div class="dashboard-grid">
+            <div class="metric-card">
+                <div style="color: #94a3b8; font-size: 0.85rem;">Active Athletes</div>
+                <div class="metric-value">48 / 50</div>
+            </div>
+            <div class="metric-card">
+                <div style="color: #94a3b8; font-size: 0.85rem;">Avg. Team Recovery Score</div>
+                <div class="metric-value" style="color: #39ff14;">78.4</div>
+            </div>
+            <div class="metric-card">
+                <div style="color: #94a3b8; font-size: 0.85rem;">Compliance Rate (7-Day)</div>
+                <div class="metric-value" style="color: #f59e0b;">91.2%</div>
+            </div>
+        </div>
+
+        <!-- Athlete Roster & Biometric Readiness -->
+        <h3 style="margin-bottom: 16px;">Assigned Athlete Roster</h3>
+        <table class="roster-table">
+            <thead>
+                <tr>
+                    <th>Athlete Name</th>
+                    <th>Goal</th>
+                    <th>Recovery Score</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Sarah Jenkins</strong></td>
+                    <td>Strength & Hypertrophy</td>
+                    <td>88 (Optimal)</td>
+                    <td><span class="status-badge badge-green">Prime Recovery</span></td>
+                    <td><button class="btn" style="padding: 6px 12px; font-size: 0.8rem;">Review AI Routine</button></td>
+                </tr>
+                <tr>
+                    <td><strong>Marcus Chen</strong></td>
+                    <td>Fat Loss & Conditioning</td>
+                    <td>42 (Fatigued)</td>
+                    <td><span class="status-badge badge-red">Modulate Intensity</span></td>
+                    <td><button class="btn" style="padding: 6px 12px; font-size: 0.8rem;">Apply HITL Override</button></td>
+                </tr>
+                <tr>
+                    <td><strong>Danielle Vance</strong></td>
+                    <td>Marathon Prep</td>
+                    <td>68 (Moderate)</td>
+                    <td><span class="status-badge badge-yellow">On Track</span></td>
+                    <td><button class="btn" style="padding: 6px 12px; font-size: 0.8rem;">Review AI Routine</button></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

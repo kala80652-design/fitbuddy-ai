@@ -1,0 +1,91 @@
+services:
+  # 1. Reverse Proxy & Ingress Load Balancer
+  nginx:
+    image: nginx:alpine
+    container_name: fitbuddy_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web
+    restart: unless-stopped
+
+  # 2. Scaled FastAPI Web Replicas
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: fitbuddy:enterprise
+    deploy:
+      replicas: 3
+    environment:
+      - DATABASE_URL=postgresql://fitbuddy_user:fitbuddy_secure_pass@db:5432/fitbuddy_db
+      - REDIS_URL=redis://redis:6379/0
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - ENVIRONMENT=production
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # 3. Asynchronous Celery GenAI Worker
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: fitbuddy:enterprise
+    command: ["celery", "-A", "app.celery_app.celery_app", "worker", "--loglevel=info", "--concurrency=4"]
+    environment:
+      - DATABASE_URL=postgresql://fitbuddy_user:fitbuddy_secure_pass@db:5432/fitbuddy_db
+      - REDIS_URL=redis://redis:6379/0
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # 4. Redis Distributed Rate Limiter & Message Broker
+  redis:
+    image: redis:7-alpine
+    container_name: fitbuddy_redis
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # 5. Production PostgreSQL Database
+  db:
+    image: postgres:16-alpine
+    container_name: fitbuddy_postgres
+    environment:
+      POSTGRES_USER: fitbuddy_user
+      POSTGRES_PASSWORD: fitbuddy_secure_pass
+      POSTGRES_DB: fitbuddy_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fitbuddy_user -d fitbuddy_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  pg_data:
+    name: fitbuddy_pg_data
+  redis_data:
+    name: fitbuddy_redis_data
